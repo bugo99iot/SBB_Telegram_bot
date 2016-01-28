@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from telegram import Updater
+from telegram import Updater, ParseMode
 import requests
 import json
 import datetime
@@ -22,7 +22,7 @@ def start(bot, update):
 
 
 def help(bot, update):
-    t = """Use /trains <Departure> <Destination> <Via> to get next 6 trains
+    t = """Use /Iliketrains <Departure> <Destination> <Via> to get next immediate connections
     from your location, note that 'Via' is optional"""
     bot.sendMessage(chat_id=update.message.chat_id, text=t)
 
@@ -42,6 +42,7 @@ def main():
 
     dispatcher.addTelegramCommandHandler('start', start)
     dispatcher.addTelegramMessageHandler(echo)
+    dispatcher.addTelegramCommandHandler('iliketrains', trains)
     dispatcher.addTelegramCommandHandler('trains', trains)
     dispatcher.addTelegramCommandHandler('stop', stop)
     dispatcher.addTelegramCommandHandler('help', help)
@@ -54,18 +55,22 @@ def trains(bot, update, args):
 
     for i in range(0, len(args)):
         if "heig" in args[i]:
-            args[i] = "yverdon"
+            args[i] = "heig-vd"
+        if "crans" in args[i]:
+            args[i] = "crans-pres-celigny"
 
     if len(args) == 2:
         info = stations(args[0], args[1])
     else:
         info = stations(args[0], args[1], args[2])
 
-    bot.sendMessage(chat_id=update.message.chat_id, text=info)
+    bot.sendMessage(chat_id=update.message.chat_id, text=info, parse_mode=telegram.ParseMode.MARKDOWN)
+
 
 def hms_to_minutes(t):
     h, m, s = [int(i) for i in t.split(':')]
     return 60*h + m
+
 
 def stations(dep_loc, arr_loc, via=''):
     url_str = "http://transport.opendata.ch/v1/connections?from=%s&to=%s"
@@ -81,9 +86,9 @@ def stations(dep_loc, arr_loc, via=''):
 
     r = json.loads(r)
     i = 0
-    res = "Connections from " + r['connections'][i]['from']['location']['name'] + " to " + r['to']['name'] + " \n\n"
+    res = "Connections from *" + r['connections'][i]['from']['location']['name'] + "* to *" + r['to']['name'] + "* \n\n"
 
-    nontrains = ["BUS", "M"]
+    nontrains = ["BUS", "M", "NFB"]
 
     for i in range(0, len(r['connections'])):
 
@@ -98,18 +103,19 @@ def stations(dep_loc, arr_loc, via=''):
                 timeArr = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M')
 
                 if r['connections'][i]['sections'][j]['journey']['category'] in nontrains:
-                    res += r['connections'][i]['sections'][j]['departure']['station']['name'] + " [" + timeDep + "] "
-                    res += " --> " + r['connections'][i]['sections'][j]['arrival']['station']['name'] + " [" + timeArr + "] "
-                    res += " [" + r['connections'][i]['sections'][j]['journey']['category'] + "] \n"
+                    res += " \[" + r['connections'][i]['sections'][j]['journey']['category'] + "] "
+                    res += r['connections'][i]['sections'][j]['departure']['station']['name'] + " \[*" + timeDep + "*] "
+                    res += " --> " + r['connections'][i]['sections'][j]['arrival']['station']['name'] + " \[*" + timeArr + "*] \n"
                 else:
-                    res += r['connections'][i]['sections'][j]['departure']['station']['name'] + " [" + timeDep + "] (P" + r['connections'][i]['sections'][j]['departure']['platform'] + ")"
-                    res += " --> " + r['connections'][i]['sections'][j]['arrival']['station']['name'] + " [" + timeArr + "] (P" + r['connections'][i]['sections'][j]['arrival']['platform']  + ")"
-                    res += " [" + r['connections'][i]['sections'][j]['journey']['category'] + "] \n"
+                    res += " \[" + r['connections'][i]['sections'][j]['journey']['category'] + "] "
+                    res += r['connections'][i]['sections'][j]['departure']['station']['name'] + " \[*" + timeDep + "*] (P" + r['connections'][i]['sections'][j]['departure']['platform'] + ")"
+                    res += " --> " + r['connections'][i]['sections'][j]['arrival']['station']['name'] + " \[*" + timeArr + "*] (P" + r['connections'][i]['sections'][j]['arrival']['platform']  + ") \n"
 
             else:
 
                 t = r['connections'][i]['sections'][j]['walk']['duration']
-                res += "Walk for %d minutes \n" % hms_to_minutes(t)
+                res += " \[Walk] "
+                res += "%d minutes \n" % hms_to_minutes(t)
 
         res += "\n"
 
