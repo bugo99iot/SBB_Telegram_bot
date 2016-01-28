@@ -1,16 +1,10 @@
 # SBB Telegram bot
 
-- Import Telegram bot library in python 2.7
-  pip install python-telegram-bot
+- Install Telegram bot library pip install python-telegram-bot
 
-- Install Telegram if not already installed
-  https://telegram.org
+- The /start command will get executed on its own when you start talking to the bot, otherwise message /start to the bot
 
-- Type @Jaspbot in terminal, click on it to start communication with it.
-
-- The /start command will get executed on its own when you start talking to the bot, otherwise message "/start" to the bot
-
-- Type "/help" to know the required syntax to query the bot for trains
+- Type /help to know the required syntax to query the bot for trains
 
 - The Syntax is /trains <Departure> <Destination> <Via>, where the <Via> argument is optional
 
