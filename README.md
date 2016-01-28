@@ -1,11 +1,11 @@
-# Telegram_bot
+# SBB Telegram bot
 
 - Import Telegram bot library in python 2.7
   pip install python-telegram-bot
-  
+
 - Install Telegram if not already installed
   https://telegram.org
-  
+
 - Type @Jaspbot in terminal, click on it to start communication with it.
 
 - The /start command will get executed on its own when you start talking to the bot, otherwise message "/start" to the bot
