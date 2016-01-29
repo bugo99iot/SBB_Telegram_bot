@@ -5,6 +5,7 @@ import requests
 import json
 import datetime
 import telegram
+import time
 
 token = '164965900:AAE1_acIuW1lEusHfNrsiGsYVIJWPJOfVcc'
 admin = ["jasp215", "FabienS", "psy_s"]
@@ -22,8 +23,8 @@ def start(bot, update):
 
 
 def help(bot, update):
-    t = """Use /Iliketrains <Departure> <Destination> <Via> to get next immediate connections
-    from your location, note that 'Via' is optional"""
+    t = """Use /iliketrains or /trains <Departure> <Destination> <Time(HH:MM)> to get next immediate connections
+    from your location, note that 'Time' is optional"""
     bot.sendMessage(chat_id=update.message.chat_id, text=t)
 
 
@@ -61,7 +62,7 @@ def trains(bot, update, args):
 
     if len(args) == 2:
         info = stations(args[0], args[1])
-    else:
+    elif len(args) == 3:
         info = stations(args[0], args[1], args[2])
 
     bot.sendMessage(chat_id=update.message.chat_id, text=info, parse_mode=telegram.ParseMode.MARKDOWN)
@@ -72,13 +73,13 @@ def hms_to_minutes(t):
     return 60*h + m
 
 
-def stations(dep_loc, arr_loc, via=''):
+def stations(dep_loc, arr_loc, time = ""):
     url_str = "http://transport.opendata.ch/v1/connections?from=%s&to=%s"
 
-    if via == '':
+    if time == '':
         url_str = url_str % (dep_loc, arr_loc)
     else:
-        url_str = url_str + "&via=%s" % (dep_loc, arr_loc, via)
+        url_str = "http://transport.opendata.ch/v1/connections?from=%s&to=%s&time=%s" % (dep_loc, arr_loc, time)
 
     response = requests.get(url_str)
 
@@ -121,10 +122,8 @@ def stations(dep_loc, arr_loc, via=''):
 
     return res
 
-# Geneva [21:00] (P6) -> Lausanne [21:42] (P2)
 
-
-# print stations("Bergieres", "Geneva")
+#print stations("Bergieres", "Geneva", "08:30")
 
 if __name__ == "__main__":
     main()
