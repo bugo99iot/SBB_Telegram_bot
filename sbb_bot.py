@@ -7,8 +7,8 @@ import datetime
 import telegram
 import time
 
-token = '164965900:AAE1_acIuW1lEusHfNrsiGsYVIJWPJOfVcc'
-admin = ["jasp215", "FabienS", "psy_s"]
+token = ''
+admin = ['yourPseudo']
 
 updater = Updater(token=token)
 
