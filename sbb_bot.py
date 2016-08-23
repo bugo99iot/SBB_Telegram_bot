@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from telegram import Updater, ParseMode
+import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler
 import requests
 import json
 import datetime
-import telegram
 import time
 
-token = ''
-admin = ['yourPseudo']
-
-updater = Updater(token=token)
-
-dispatcher = updater.dispatcher
-
+token = '164965900:AAE1_acIuW1lEusHfNrsiGsYVIJWPJOfVcc'
+admin = ["jasp215", "FabienS", "psy_s"]
 
 def start(bot, update):
     print update.message.chat.username
@@ -30,35 +25,16 @@ def help(bot, update):
 
 def stop(bot, update):
     if update.message.chat.username in admin:
+        updater.stop_polling()
         updater.stop()
 
 
-def echo(bot, update):
-    t1 = "Yes, "
-    t2 = update.message.text
-    bot.sendMessage(chat_id=update.message.chat_id, text=t1+t2)
-
-
-def main():
-
-    dispatcher.addTelegramCommandHandler('start', start)
-    dispatcher.addTelegramMessageHandler(echo)
-    dispatcher.addTelegramCommandHandler('iliketrains', trains)
-    dispatcher.addTelegramCommandHandler('trains', trains)
-    dispatcher.addTelegramCommandHandler('stop', stop)
-    dispatcher.addTelegramCommandHandler('help', help)
-
-    updater.start_polling()
-
-
 def trains(bot, update, args):
-    print args
+    # print args
 
     for i in range(0, len(args)):
         if "heig" in args[i]:
             args[i] = "heig-vd"
-        if "crans" in args[i]:
-            args[i] = "crans-pres-celigny"
 
     if len(args) == 2:
         info = stations(args[0], args[1])
@@ -113,7 +89,6 @@ def stations(dep_loc, arr_loc, time = ""):
                     res += " --> " + r['connections'][i]['sections'][j]['arrival']['station']['name'] + " \[*" + timeArr + "*] (P" + r['connections'][i]['sections'][j]['arrival']['platform']  + ") \n"
 
             else:
-
                 t = r['connections'][i]['sections'][j]['walk']['duration']
                 res += " \[Walk] "
                 res += "%d minutes \n" % hms_to_minutes(t)
@@ -123,7 +98,26 @@ def stations(dep_loc, arr_loc, time = ""):
     return res
 
 
-#print stations("Bergieres", "Geneva", "08:30")
+def error(bot, update, error):
+    logger.warn('Update "%s" caused error "%s"' % (update, error))
+
+
+def main():
+    updater = Updater(token=token)
+    dp = updater.dispatcher
+
+    dp.add_handler(CommandHandler('start', start))
+    dp.add_handler(CommandHandler('iliketrains', trains, pass_args=True))
+    dp.add_handler(CommandHandler('trains', trains, pass_args=True))
+    dp.add_handler(CommandHandler('stop', stop))
+    dp.add_handler(CommandHandler('help', help))
+
+    dp.add_error_handler(error)
+
+    updater.start_polling()
+
+    updater.idle()
+
 
 if __name__ == "__main__":
     main()
