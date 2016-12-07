@@ -7,8 +7,8 @@ import json
 import datetime
 import time
 
-token = '164965900:AAE1_acIuW1lEusHfNrsiGsYVIJWPJOfVcc'
-admin = ["jasp215", "FabienS", "psy_s"]
+token = 'your_token'
+admin = ["pseudo1", "pseudo2"]
 
 def start(bot, update):
     print update.message.chat.username
@@ -33,8 +33,6 @@ def trains(bot, update, args):
     # print args
 
     for i in range(0, len(args)):
-        if "heig" in args[i]:
-            args[i] = "heig-vd"
 
     if len(args) == 2:
         info = stations(args[0], args[1])
